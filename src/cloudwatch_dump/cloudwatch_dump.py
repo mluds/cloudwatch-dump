@@ -75,14 +75,12 @@ def get_metric_statistics(metric, start_time, end_time, statistics, unit, period
     return map(f, datapoints)
 
 
-def get_data(metrics, statistics_list, start, end, period_in_min):
+def get_data(metrics, statistics_list, start, end, period):
     """
     Get summerized CloudWatch metric status,
     then generate tuples of metric, statistics, value, and timestamp in UTC.
     """
-    p = timedelta(minutes=period_in_min)
-
-    params = ((m, start, end, s, None, p.seconds) for m in metrics for s in statistics_list)
+    params = ((m, start, end, s, None, period) for m in metrics for s in statistics_list)
     return (data for param in params for data in get_metric_statistics(*param))
 
 
@@ -125,7 +123,7 @@ def parse_args():
     )
     parser.add_option(
         '--period', dest='period', default=5, type='int',
-        help='minutes to aggregate in the query'
+        help='seconds to aggregate in the query'
     )
     parser.add_option(
         '--resolve', action='store_true', dest='resolve', default=False,
@@ -161,7 +159,7 @@ def main():
         # print all query params when check mode
         print('start : %s' % start)
         print('end   : %s' % end)
-        print('period: %s min' % options.period)
+        print('period: %s sec' % options.period)
         print('ec2 names: %s' % ec2_names)
         for q in query_params:
             print('will collect metric: %s' % (metric_to_tag(q[0], q[1], ec2_names)))
